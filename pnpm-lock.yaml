@@ -14,6 +14,9 @@ importers:
       '@radix-ui/react-tabs':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@18.3.5(@types/react@18.3.17))(@types/react@18.3.17)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/plotly.js':
+        specifier: ^2.35.1
+        version: 2.35.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -29,6 +32,9 @@ importers:
       plotly.js:
         specifier: ^2.35.3
         version: 2.35.3(mapbox-gl@1.13.3)(webpack@5.97.1)
+      plotly.js-dist-min:
+        specifier: ^2.35.3
+        version: 2.35.3
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -54,6 +60,9 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.10.2
+      '@types/plotly.js-dist-min':
+        specifier: ^2.3.4
+        version: 2.3.4
       '@types/react':
         specifier: ^18.3.12
         version: 18.3.17
@@ -871,6 +880,9 @@ packages:
 
   '@types/pbf@3.0.5':
     resolution: {integrity: sha512-j3pOPiEcWZ34R6a6mN07mUkM4o4Lwf6hPNt8eilOeZhTFbxFXmKhvXl9Y28jotFPaI1bpPDJsbCprUoNke6OrA==}
+
+  '@types/plotly.js-dist-min@2.3.4':
+    resolution: {integrity: sha512-ISwLFV6Zs/v3DkaRFLyk2rvYAfVdnYP2VVVy7h+fBDWw52sn7sMUzytkWiN4M75uxr1uz1uiBioePTDpAfoFIg==}
 
   '@types/plotly.js@2.35.1':
     resolution: {integrity: sha512-9fTHC8qeJNEDpGJK1qIJAEcRxrI9uPrap32I8cbCLPKsqwFmafOYHecaBzvIJXEPhLIUiQocN9Bc/tIV9CjsxQ==}
@@ -2240,6 +2252,9 @@ packages:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
 
+  plotly.js-dist-min@2.35.3:
+    resolution: {integrity: sha512-sz2HLP8gkysLx/BanM2PtJTtZ1PLPwdHwMWNri2YxLBy3IOeuDsVQtlmWa4hoK3j/fi4naaD3uZJqH5ozM3zGg==}
+
   plotly.js@2.35.3:
     resolution: {integrity: sha512-7RaC6FxmCUhpD6H4MpD+QLUu3hCn76I11rotRefrh3m1iDvWqGnVqVk9dSaKmRAhFD3vsNsYea0OxnR1rc2IzQ==}
 
@@ -3518,6 +3533,10 @@ snapshots:
       undici-types: 6.20.0
 
   '@types/pbf@3.0.5': {}
+
+  '@types/plotly.js-dist-min@2.3.4':
+    dependencies:
+      '@types/plotly.js': 2.35.1
 
   '@types/plotly.js@2.35.1': {}
 
@@ -5029,6 +5048,8 @@ snapshots:
   pify@2.3.0: {}
 
   pirates@4.0.6: {}
+
+  plotly.js-dist-min@2.35.3: {}
 
   plotly.js@2.35.3(mapbox-gl@1.13.3)(webpack@5.97.1):
     dependencies:
