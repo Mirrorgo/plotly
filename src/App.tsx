@@ -10,8 +10,8 @@ function App() {
       <div>
         <Tabs defaultValue="plotly" className="w-[400px]">
           <TabsList>
-            <TabsTrigger value="plotly">Plotly</TabsTrigger>
-            <TabsTrigger value="plotlyjs">Plotly</TabsTrigger>
+            <TabsTrigger value="plotly">Plotly-react</TabsTrigger>
+            <TabsTrigger value="plotlyjs">Plotly-js</TabsTrigger>
             <TabsTrigger value="d3">D3</TabsTrigger>
             <TabsTrigger value="foamtree">Foamtree</TabsTrigger>
           </TabsList>
