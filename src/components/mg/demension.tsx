@@ -7,7 +7,7 @@ function Dimension() {
   const [dimensions, setDimensions] = useState([
     { id: "device", label: "终端类型", checked: false },
     { id: "enterprise", label: "企业", checked: false },
-    { id: "region", label: "地区", checked: false },
+    { id: "playMode", label: "播放模式", checked: false },
   ]);
 
   const handleCheck = (index: number) => {

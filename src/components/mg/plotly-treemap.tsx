@@ -1,156 +1,317 @@
 import React, { useMemo, useState } from "react";
 import Plot from "react-plotly.js";
-import { Button } from "../ui/button";
-import Demension from "./demension";
+import { Button } from "@/components/ui/button";
+import { Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// 基础数据结构
+// 播放模式的显示文本映射
+const playModeLabels = {
+  order: "顺序播放",
+  random: "随机播放",
+  one_loop: "单曲循环",
+};
+
 const nodes = [
+  // 小米数据
   {
     id: "1",
     name: "小米",
     device: "手机",
-    region: "华北",
-    dau: 15000,
-    stalls: 3500,
+    playMode: "order",
+    dau: 5000,
+    stalls: 1200,
   },
   {
     id: "2",
-    name: "华为",
+    name: "小米",
     device: "手机",
-    region: "华南",
-    dau: 20000,
-    stalls: 4500,
+    playMode: "random",
+    dau: 6000,
+    stalls: 1300,
   },
   {
     id: "3",
-    name: "比亚迪",
-    device: "车载",
-    region: "华东",
-    dau: 25000,
-    stalls: 5000,
+    name: "小米",
+    device: "手机",
+    playMode: "one_loop",
+    dau: 4000,
+    stalls: 1000,
   },
   {
     id: "4",
     name: "小米",
     device: "桌面",
-    region: "华北",
-    dau: 12000,
-    stalls: 3000,
+    playMode: "order",
+    dau: 4000,
+    stalls: 1000,
   },
   {
     id: "5",
-    name: "华为",
-    device: "音箱",
-    region: "西南",
-    dau: 18000,
-    stalls: 40000,
+    name: "小米",
+    device: "桌面",
+    playMode: "random",
+    dau: 5000,
+    stalls: 1200,
   },
   {
     id: "6",
+    name: "小米",
+    device: "桌面",
+    playMode: "one_loop",
+    dau: 3000,
+    stalls: 800,
+  },
+
+  // 华为数据
+  {
+    id: "7",
+    name: "华为",
+    device: "手机",
+    playMode: "order",
+    dau: 7000,
+    stalls: 1500,
+  },
+  {
+    id: "8",
+    name: "华为",
+    device: "手机",
+    playMode: "random",
+    dau: 8000,
+    stalls: 1800,
+  },
+  {
+    id: "9",
+    name: "华为",
+    device: "手机",
+    playMode: "one_loop",
+    dau: 5000,
+    stalls: 1200,
+  },
+  {
+    id: "10",
+    name: "华为",
+    device: "音箱",
+    playMode: "order",
+    dau: 6000,
+    stalls: 13000,
+  },
+  {
+    id: "11",
+    name: "华为",
+    device: "音箱",
+    playMode: "random",
+    dau: 7000,
+    stalls: 15000,
+  },
+  {
+    id: "12",
+    name: "华为",
+    device: "音箱",
+    playMode: "one_loop",
+    dau: 5000,
+    stalls: 12000,
+  },
+
+  // 比亚迪数据
+  {
+    id: "13",
+    name: "比亚迪",
+    device: "车载",
+    playMode: "order",
+    dau: 8000,
+    stalls: 1800,
+  },
+  {
+    id: "14",
+    name: "比亚迪",
+    device: "车载",
+    playMode: "random",
+    dau: 9000,
+    stalls: 2000,
+  },
+  {
+    id: "15",
+    name: "比亚迪",
+    device: "车载",
+    playMode: "one_loop",
+    dau: 8000,
+    stalls: 1200,
+  },
+
+  // 小天才数据
+  {
+    id: "16",
     name: "小天才",
     device: "手表",
-    region: "华中",
-    dau: 10000,
-    stalls: 2500,
+    playMode: "order",
+    dau: 3000,
+    stalls: 800,
+  },
+  {
+    id: "17",
+    name: "小天才",
+    device: "手表",
+    playMode: "random",
+    dau: 4000,
+    stalls: 1000,
+  },
+  {
+    id: "18",
+    name: "小天才",
+    device: "手表",
+    playMode: "one_loop",
+    dau: 3000,
+    stalls: 700,
   },
 ];
 
-// 计算分类汇总数据
-function calculateTotals(nodes, groupBy) {
-  const totals = new Map();
+function DynamicTreemap() {
+  // 维度配置状态
+  const [dimensions, setDimensions] = useState([
+    { id: "device", label: "终端类型", checked: false },
+    { id: "enterprise", label: "企业", checked: false },
+    { id: "playMode", label: "播放模式", checked: false },
+  ]);
 
-  nodes.forEach((node) => {
-    const key = node[groupBy];
-    if (!totals.has(key)) {
-      totals.set(key, { dau: 0, stalls: 0 });
+  const [maxDepth, setMaxDepth] = useState(1);
+
+  // 处理维度的选择
+  const handleCheck = (index) => {
+    const newDimensions = dimensions.map((dim, i) =>
+      i === index ? { ...dim, checked: !dim.checked } : dim
+    );
+    setDimensions(newDimensions);
+  };
+
+  // 处理维度的左移
+  const handleMoveLeft = () => {
+    const checkedIndices = dimensions
+      .map((dim, idx) => (dim.checked ? idx : -1))
+      .filter((idx) => idx !== -1);
+
+    if (checkedIndices.length === 0 || checkedIndices[0] === 0) {
+      return;
     }
-    const groupTotals = totals.get(key);
-    groupTotals.dau += node.dau;
-    groupTotals.stalls += node.stalls;
-  });
 
-  return totals;
-}
+    const newDimensions = [...dimensions];
+    checkedIndices.forEach((idx) => {
+      [newDimensions[idx - 1], newDimensions[idx]] = [
+        newDimensions[idx],
+        newDimensions[idx - 1],
+      ];
+    });
 
-function PlotlyTreemap() {
-  // 默认按终端类型分组
-  const [groupBy, setGroupBy] = useState("device");
+    setDimensions(newDimensions);
+  };
 
+  // 处理维度的右移
+  const handleMoveRight = () => {
+    const checkedIndices = dimensions
+      .map((dim, idx) => (dim.checked ? idx : -1))
+      .filter((idx) => idx !== -1)
+      .reverse();
+
+    if (
+      checkedIndices.length === 0 ||
+      checkedIndices[0] === dimensions.length - 1
+    ) {
+      return;
+    }
+
+    const newDimensions = [...dimensions];
+    checkedIndices.forEach((idx) => {
+      [newDimensions[idx], newDimensions[idx + 1]] = [
+        newDimensions[idx + 1],
+        newDimensions[idx],
+      ];
+    });
+
+    setDimensions(newDimensions);
+  };
+
+  // 左移按钮禁用条件
+  const isLeftMoveDisabled = () => {
+    const firstCheckedIndex = dimensions.findIndex((dim) => dim.checked);
+    return firstCheckedIndex === -1 || firstCheckedIndex === 0;
+  };
+
+  // 右移按钮禁用条件
+  const isRightMoveDisabled = () => {
+    const lastCheckedIndex = dimensions
+      .map((dim, idx) => ({ dim, idx }))
+      .reverse()
+      .find((item) => item.dim.checked)?.idx;
+
+    return (
+      lastCheckedIndex === undefined ||
+      lastCheckedIndex === dimensions.length - 1
+    );
+  };
+
+  // 构建树形数据
   const { labels, parents, daus, stalls } = useMemo(() => {
-    const groupTotals = calculateTotals(nodes, groupBy);
+    const getDimensionValue = (node, dimId) => {
+      switch (dimId) {
+        case "device":
+          return node.device;
+        case "enterprise":
+          return node.name;
+        case "playMode":
+          return playModeLabels[node.playMode];
+        default:
+          return "";
+      }
+    };
 
-    // 计算总计
-    const totalDau = nodes.reduce((sum, node) => sum + node.dau, 0);
-    const totalStalls = nodes.reduce((sum, node) => sum + node.stalls, 0);
+    // 获取激活的维度顺序
+    const activeDimensions = dimensions.map((d) => d.id);
 
-    // 构建树形图所需的数据结构
+    // 构建树形数据结构
     let treeData = [
-      // 根节点
       {
         name: "总计",
         parent: "",
-        dau: totalDau,
-        stalls: totalStalls,
+        dau: nodes.reduce((sum, node) => sum + node.dau, 0),
+        stalls: nodes.reduce((sum, node) => sum + node.stalls, 0),
       },
     ];
 
-    // 根据选择的维度构建树形结构
-    if (groupBy === "device") {
-      treeData = [
-        ...treeData,
-        // 终端类型节点
-        ...Array.from(groupTotals.entries()).map(([device, totals]) => ({
-          name: device,
-          parent: "总计",
-          dau: totals.dau,
-          stalls: totals.stalls,
-        })),
-        // 具体企业节点
-        ...nodes.map((node) => ({
-          name: `${node.name}-${node.device}`,
-          parent: node.device,
-          dau: node.dau,
-          stalls: node.stalls,
-        })),
-      ];
-    } else if (groupBy === "name") {
-      treeData = [
-        ...treeData,
-        // 企业节点
-        ...Array.from(groupTotals.entries()).map(([name, totals]) => ({
-          name: name,
-          parent: "总计",
-          dau: totals.dau,
-          stalls: totals.stalls,
-        })),
-        // 具体终端类型节点
-        ...nodes.map((node) => ({
-          name: `${node.device}-${node.name}`,
-          parent: node.name,
-          dau: node.dau,
-          stalls: node.stalls,
-        })),
-      ];
-    } else {
-      // 按地区分组
-      treeData = [
-        ...treeData,
-        // 地区节点
-        ...Array.from(groupTotals.entries()).map(([region, totals]) => ({
-          name: region,
-          parent: "总计",
-          dau: totals.dau,
-          stalls: totals.stalls,
-        })),
-        // 具体设备和企业节点
-        ...nodes.map((node) => ({
-          name: `${node.name}-${node.device}`,
-          parent: node.region,
-          dau: node.dau,
-          stalls: node.stalls,
-        })),
-      ];
-    }
+    // 根据维度顺序构建层级
+    let groups = new Map();
+    activeDimensions.forEach((dim, level) => {
+      const newGroups = new Map();
+
+      nodes.forEach((node) => {
+        const path = activeDimensions
+          .slice(0, level + 1)
+          .map((d) => getDimensionValue(node, d))
+          .join("-");
+        const parentPath =
+          level === 0
+            ? "总计"
+            : activeDimensions
+                .slice(0, level)
+                .map((d) => getDimensionValue(node, d))
+                .join("-");
+
+        if (!newGroups.has(path)) {
+          newGroups.set(path, {
+            name: path,
+            parent: parentPath,
+            dau: 0,
+            stalls: 0,
+          });
+        }
+
+        const group = newGroups.get(path);
+        group.dau += node.dau;
+        group.stalls += node.stalls;
+      });
+
+      groups = newGroups;
+      treeData.push(...Array.from(groups.values()));
+    });
 
     return {
       labels: treeData.map((item) => item.name),
@@ -158,7 +319,7 @@ function PlotlyTreemap() {
       daus: treeData.map((item) => item.dau),
       stalls: treeData.map((item) => item.stalls),
     };
-  }, [groupBy]);
+  }, [dimensions]);
 
   const data = [
     {
@@ -184,6 +345,7 @@ function PlotlyTreemap() {
       hovertemplate:
         "<b>%{label}</b><br>DAU: %{value:,.0f}<br>卡顿数量: %{customdata:,.0f}次<extra></extra>",
       branchvalues: "total",
+      maxdepth: maxDepth + 1,
     },
   ];
 
@@ -191,46 +353,86 @@ function PlotlyTreemap() {
     width: 800,
     height: 600,
     title: {
-      text: `卡顿分析树形图 - ${
-        groupBy === "device"
-          ? "按终端类型"
-          : groupBy === "name"
-          ? "按企业"
-          : "按地区"
-      }`,
+      text: "卡顿分析树形图（点击方块可下钻查看详情）",
       font: { size: 18 },
     },
     margin: { t: 40, l: 10, r: 10, b: 10 },
   };
 
-  // 切换分组维度
-  const toggleGroupBy = () => {
-    if (groupBy === "device") {
-      setGroupBy("name");
-    } else if (groupBy === "name") {
-      setGroupBy("region");
-    } else {
-      setGroupBy("device");
-    }
+  const handleIncrease = () => {
+    setMaxDepth((prev) => Math.min(prev + 1, 3));
+  };
+
+  const handleDecrease = () => {
+    setMaxDepth((prev) => Math.max(prev - 1, 1));
   };
 
   return (
-    <div>
-      <div className="mb-4">
-        <Button onClick={toggleGroupBy}>
-          切换到
-          {groupBy === "device"
-            ? "按企业"
-            : groupBy === "name"
-            ? "按地区"
-            : "按终端类型"}
-          视图
-        </Button>
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <div className="flex items-center space-x-4">
+          {dimensions.map((dim, idx) => (
+            <div key={dim.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={dim.id}
+                checked={dim.checked}
+                onCheckedChange={() => handleCheck(idx)}
+              />
+              <label
+                htmlFor={dim.id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {dim.label}
+              </label>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleMoveLeft}
+            disabled={isLeftMoveDisabled()}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleMoveRight}
+            disabled={isRightMoveDisabled()}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      <Demension />
+
+      <div className="flex items-center gap-4 justify-end">
+        <div>同视图下的同时可见的维度数量</div>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleIncrease}
+            disabled={maxDepth >= 3}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <div className="text-lg font-medium">{maxDepth}</div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleDecrease}
+            disabled={maxDepth <= 1}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
       <Plot data={data} layout={layout} config={{ responsive: true }} />
     </div>
   );
 }
 
-export default PlotlyTreemap;
+export default DynamicTreemap;
