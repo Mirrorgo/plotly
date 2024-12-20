@@ -1,17 +1,58 @@
 import React, { useMemo, useState } from "react";
 import Plot from "react-plotly.js";
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 import Demension from "./demension";
 
 // 基础数据结构
 const nodes = [
-  { id: "1", name: "小米", category: "车载", dau: 15000, stalls: 3500 },
-  { id: "2", name: "华为", category: "车载", dau: 20000, stalls: 4500 },
-  { id: "3", name: "比亚迪", category: "车载", dau: 25000, stalls: 5000 },
-  { id: "4", name: "小米", category: "手表", dau: 12000, stalls: 3000 },
-  { id: "5", name: "华为", category: "手表", dau: 18000, stalls: 40000 },
-  { id: "6", name: "小天才", category: "手表", dau: 10000, stalls: 2500 },
+  {
+    id: "1",
+    name: "小米",
+    device: "手机",
+    region: "华北",
+    dau: 15000,
+    stalls: 3500,
+  },
+  {
+    id: "2",
+    name: "华为",
+    device: "手机",
+    region: "华南",
+    dau: 20000,
+    stalls: 4500,
+  },
+  {
+    id: "3",
+    name: "比亚迪",
+    device: "车载",
+    region: "华东",
+    dau: 25000,
+    stalls: 5000,
+  },
+  {
+    id: "4",
+    name: "小米",
+    device: "桌面",
+    region: "华北",
+    dau: 12000,
+    stalls: 3000,
+  },
+  {
+    id: "5",
+    name: "华为",
+    device: "音箱",
+    region: "西南",
+    dau: 18000,
+    stalls: 40000,
+  },
+  {
+    id: "6",
+    name: "小天才",
+    device: "手表",
+    region: "华中",
+    dau: 10000,
+    stalls: 2500,
+  },
 ];
 
 // 计算分类汇总数据
@@ -32,7 +73,8 @@ function calculateTotals(nodes, groupBy) {
 }
 
 function PlotlyTreemap() {
-  const [groupBy, setGroupBy] = useState("category");
+  // 默认按终端类型分组
+  const [groupBy, setGroupBy] = useState("device");
 
   const { labels, parents, daus, stalls } = useMemo(() => {
     const groupTotals = calculateTotals(nodes, groupBy);
@@ -52,40 +94,58 @@ function PlotlyTreemap() {
       },
     ];
 
-    if (groupBy === "category") {
-      // 按类别分组
+    // 根据选择的维度构建树形结构
+    if (groupBy === "device") {
       treeData = [
         ...treeData,
-        // 分类节点
-        ...Array.from(groupTotals.entries()).map(([category, totals]) => ({
-          name: category,
+        // 终端类型节点
+        ...Array.from(groupTotals.entries()).map(([device, totals]) => ({
+          name: device,
           parent: "总计",
           dau: totals.dau,
           stalls: totals.stalls,
         })),
-        // 具体品牌节点
+        // 具体企业节点
         ...nodes.map((node) => ({
-          name: `${node.name}-${node.category}`,
-          parent: node.category,
+          name: `${node.name}-${node.device}`,
+          parent: node.device,
+          dau: node.dau,
+          stalls: node.stalls,
+        })),
+      ];
+    } else if (groupBy === "name") {
+      treeData = [
+        ...treeData,
+        // 企业节点
+        ...Array.from(groupTotals.entries()).map(([name, totals]) => ({
+          name: name,
+          parent: "总计",
+          dau: totals.dau,
+          stalls: totals.stalls,
+        })),
+        // 具体终端类型节点
+        ...nodes.map((node) => ({
+          name: `${node.device}-${node.name}`,
+          parent: node.name,
           dau: node.dau,
           stalls: node.stalls,
         })),
       ];
     } else {
-      // 按品牌分组
+      // 按地区分组
       treeData = [
         ...treeData,
-        // 品牌节点
-        ...Array.from(groupTotals.entries()).map(([brand, totals]) => ({
-          name: brand,
+        // 地区节点
+        ...Array.from(groupTotals.entries()).map(([region, totals]) => ({
+          name: region,
           parent: "总计",
           dau: totals.dau,
           stalls: totals.stalls,
         })),
-        // 具体类别节点
+        // 具体设备和企业节点
         ...nodes.map((node) => ({
-          name: `${node.category}-${node.name}`,
-          parent: node.name,
+          name: `${node.name}-${node.device}`,
+          parent: node.region,
           dau: node.dau,
           stalls: node.stalls,
         })),
@@ -110,7 +170,7 @@ function PlotlyTreemap() {
       marker: {
         colors: stalls,
         colorscale: [
-          [0, "#fff7ec"], // 更改配色方案为橙色系，卡顿数越多颜色越深
+          [0, "#fff7ec"],
           [0.5, "#fc8d59"],
           [1, "#7f0000"],
         ],
@@ -131,21 +191,40 @@ function PlotlyTreemap() {
     width: 800,
     height: 600,
     title: {
-      text: `卡顿分析树形图 - ${groupBy === "category" ? "按类别" : "按品牌"}`,
+      text: `卡顿分析树形图 - ${
+        groupBy === "device"
+          ? "按终端类型"
+          : groupBy === "name"
+          ? "按企业"
+          : "按地区"
+      }`,
       font: { size: 18 },
     },
     margin: { t: 40, l: 10, r: 10, b: 10 },
   };
 
+  // 切换分组维度
+  const toggleGroupBy = () => {
+    if (groupBy === "device") {
+      setGroupBy("name");
+    } else if (groupBy === "name") {
+      setGroupBy("region");
+    } else {
+      setGroupBy("device");
+    }
+  };
+
   return (
     <div>
       <div className="mb-4">
-        <Button
-          onClick={() =>
-            setGroupBy(groupBy === "category" ? "name" : "category")
-          }
-        >
-          切换到{groupBy === "category" ? "按品牌" : "按类别"}视图
+        <Button onClick={toggleGroupBy}>
+          切换到
+          {groupBy === "device"
+            ? "按企业"
+            : groupBy === "name"
+            ? "按地区"
+            : "按终端类型"}
+          视图
         </Button>
       </div>
       <Demension />
