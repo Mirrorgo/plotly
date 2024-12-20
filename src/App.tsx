@@ -1,5 +1,5 @@
-import D3Treemap from "./components/mg/d3-treemap";
-import FoamTreeTreeMap from "./components/mg/foamtree-treemap";
+// import D3Treemap from "./components/mg/d3-treemap";
+// import FoamTreeTreeMap from "./components/mg/foamtree-treemap";
 import PlotlyTreemap from "./components/mg/plotly-treemap";
 import PlotlyjsTreemap from "./components/mg/plotlyjs-treemap";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";

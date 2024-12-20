@@ -135,29 +135,32 @@ const D3Treemap = () => {
     // 添加矩形
     leaf
       .append("rect")
-      .attr("fill", (d) => {
+      .attr("fill", (d: any): string => {
         let current = d;
-        while (current.depth > 1) current = current.parent!;
-        return color(current.data.name);
+        // 查找最深层次的父节点
+        while (current.depth > 1 && current.parent) {
+          current = current.parent;
+        }
+        return color(current.data.name) as string; // 强制转换为 string 类型
       })
       .attr("fill-opacity", 0.6)
-      .attr("width", (d) => d.x1 - d.x0)
-      .attr("height", (d) => d.y1 - d.y0)
+      .attr("width", (d: any) => d.x1 - d.x0)
+      .attr("height", (d: any) => d.y1 - d.y0)
       .style("stroke", "white")
       .style("stroke-width", 2);
 
-    // 为文本添加裁剪路径
-    const clipPath = leaf
-      .append("clipPath")
-      .attr("id", (d, i) => `clip-${i}`)
-      .append("rect")
-      .attr("width", (d) => d.x1 - d.x0)
-      .attr("height", (d) => d.y1 - d.y0);
+    // // 为文本添加裁剪路径
+    // const clipPath = leaf
+    //   .append("clipPath")
+    //   .attr("id", (d, i) => `clip-${i}`)
+    //   .append("rect")
+    //   .attr("width", (d) => d.x1 - d.x0)
+    //   .attr("height", (d) => d.y1 - d.y0);
 
     // 添加多行文本
     const text = leaf
       .append("text")
-      .attr("clip-path", (d, i) => `url(#clip-${i})`);
+      .attr("clip-path", (_, i) => `url(#clip-${i})`);
 
     // 添加名称
     text

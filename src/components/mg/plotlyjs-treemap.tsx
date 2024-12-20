@@ -38,6 +38,7 @@ function PlotlyjsTreemap() {
 
         hovertemplate:
           "<b>%{label}</b><br>销售额: ¥%{value:,.0f}<extra></extra>",
+        // @ts-ignore
         tiling: {
           // packing: "squarify",
           packing: "binary",

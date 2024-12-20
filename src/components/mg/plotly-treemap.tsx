@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Plot from "react-plotly.js";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
@@ -6,13 +6,22 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // 播放模式的显示文本映射
-const playModeLabels = {
+const playModeLabels: Record<string, string> = {
   order: "顺序播放",
   random: "随机播放",
   one_loop: "单曲循环",
 };
 
-const nodes = [
+interface Node {
+  id: string;
+  name: string;
+  device: string;
+  playMode: string;
+  dau: number;
+  stalls: number;
+}
+
+const nodes: Node[] = [
   // 小米数据
   {
     id: "1",
@@ -177,7 +186,7 @@ function DynamicTreemap() {
   const [maxDepth, setMaxDepth] = useState(1);
 
   // 处理维度的选择
-  const handleCheck = (index) => {
+  const handleCheck = (index: number) => {
     const newDimensions = dimensions.map((dim, i) =>
       i === index ? { ...dim, checked: !dim.checked } : dim
     );
@@ -251,7 +260,7 @@ function DynamicTreemap() {
 
   // 构建树形数据
   const { labels, parents, daus, stalls } = useMemo(() => {
-    const getDimensionValue = (node, dimId) => {
+    const getDimensionValue = (node: Node, dimId: string) => {
       switch (dimId) {
         case "device":
           return node.device;
@@ -279,7 +288,7 @@ function DynamicTreemap() {
 
     // 根据维度顺序构建层级
     let groups = new Map();
-    activeDimensions.forEach((dim, level) => {
+    activeDimensions.forEach((_, level) => {
       const newGroups = new Map();
 
       nodes.forEach((node) => {
@@ -321,7 +330,7 @@ function DynamicTreemap() {
     };
   }, [dimensions]);
 
-  const data = [
+  const data: Plotly.Data[] = [
     {
       type: "treemap",
       labels,
@@ -345,6 +354,8 @@ function DynamicTreemap() {
       hovertemplate:
         "<b>%{label}</b><br>DAU: %{value:,.0f}<br>卡顿数量: %{customdata:,.0f}次<extra></extra>",
       branchvalues: "total",
+      // @ts-ignore
+      // 这个参数实际上可以用，但是官方ts文件缺失这个参数，官方文档是有的
       maxdepth: maxDepth + 1,
     },
   ];
